@@ -1,0 +1,196 @@
+package Menu;
+
+import Player.GameSettings;
+import Player.Juego;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+/**
+ * Menú de selección de personaje:
+ * - No hay selección por defecto.
+ * - Confirmar deshabilitado hasta que elijas uno.
+ * - Botón Volver para regresar a Dificultad.
+ *
+ * IMÁGENES:
+ *  - Fondo de menú: busca en este orden
+ *      /Menu/imagen/Estatua.gif
+ *      /Menu/imagen/Jefe.gif
+ *      /Menu/imagen/Enemigos/Calavoso2.png
+ *  - Personajes (sprites para tarjeta y para la arena):
+ *      /Menu/imagen/Heroes/Kevin walk.gif   (Zorritas)
+ *      /Menu/imagen/Heroes/Squeletron.gif   (Larry)
+ */
+public class MenuPersonajesPanel extends JPanel {
+
+    private static final String FONDO1 = "/Imagenes/menuperso.gif";
+    private static final String FONDO2 = "/Menu/imagen/Jefe.gif";
+    private static final String FONDO3 = "/Menu/imagen/Enemigos/Calavoso2.png";
+
+    private static final String HEROE1_IMG = "/Menu/imagen/Heroes/Kevin walk.gif"; // Zorritas
+    private static final String HEROE2_IMG = "/Menu/imagen/Heroes/Squeletron.gif"; // Larry
+
+    private final MenuPrincipal frame;
+    private final GameSettings settings;
+
+    private String elegido = null; // "Zorritas" o "Larry"
+    private final JButton btnConfirmar = MenuPrincipal.boton("Confirmar");
+    private final JButton btnVolver    = MenuPrincipal.boton("Volver");
+
+    public MenuPersonajesPanel(MenuPrincipal frame, GameSettings settings) {
+        this.frame = frame;
+        this.settings = settings;
+
+        setLayout(new BorderLayout());
+
+        JPanel fondo = new MenuPrincipal.PanelFondo(MenuPrincipal.firstExisting(FONDO1, FONDO2, FONDO3));
+        fondo.setLayout(new BorderLayout());
+        add(fondo, BorderLayout.CENTER);
+
+        // Header
+        JLabel titulo = new JLabel("Elige tu Personaje (" + settings.dificultadName + ")", SwingConstants.CENTER);
+        titulo.setFont(new Font("Consolas", Font.BOLD, 32));
+        titulo.setForeground(Color.WHITE);
+        JPanel header = new JPanel(new BorderLayout()) { @Override public boolean isOpaque(){ return false; } };
+        header.setBorder(BorderFactory.createEmptyBorder(16,16,8,16));
+        header.add(titulo, BorderLayout.CENTER);
+
+        // Cards de personaje
+        JPanel cards = new JPanel(new GridLayout(1,2,24,0)) { @Override public boolean isOpaque(){ return false; } };
+        cards.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
+
+        HeroCard card1 = new HeroCard("Zorritas", HEROE1_IMG);
+        HeroCard card2 = new HeroCard("Larry",    HEROE2_IMG);
+
+        cards.add(card1);
+        cards.add(card2);
+
+        // Footer con botones
+        JPanel footer = new JPanel() { @Override public boolean isOpaque(){ return false; } };
+        footer.setBorder(BorderFactory.createEmptyBorder(12, 16, 24, 16));
+        Dimension BTN = new Dimension(280, 56);
+        btnConfirmar.setPreferredSize(BTN);
+        btnVolver.setPreferredSize(BTN);
+        btnConfirmar.setEnabled(false); // <- deshabilitado hasta que elijas
+
+        footer.add(btnVolver);
+        footer.add(Box.createHorizontalStrut(20));
+        footer.add(btnConfirmar);
+
+        fondo.add(header, BorderLayout.NORTH);
+        fondo.add(cards,  BorderLayout.CENTER);
+        fondo.add(footer, BorderLayout.SOUTH);
+
+        // Listeners: ahora pasamos EXACTAMENTE el texto de la tarjeta
+        card1.addSelectionListener(() -> onElegir("Zorritas", card1, card2));
+        card2.addSelectionListener(() -> onElegir("Larry",    card2, card1));
+
+        btnVolver.addActionListener(e -> {
+            frame.setContentPane(new MenuDificultadPanel(frame));
+            frame.revalidate(); frame.repaint();
+        });
+
+        btnConfirmar.addActionListener(e -> {
+            if (elegido == null) return; // safety
+
+            // Pide nombre (si no tienes otro menú de nombre ya)
+            String nombre = JOptionPane.showInputDialog(frame, "Ingresa tu nombre:", "Jugador");
+            if (nombre == null) return; // canceló
+
+            // Abre la arena
+            JFrame ventana = new JFrame("Arena - Dungeon Enemigos");
+            Player.Juego game = new Juego(settings, elegido, nombre); // ← pasamos "Zorritas" o "Larry"
+            ventana.setContentPane(game);
+            ventana.setUndecorated(true);
+            ventana.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            ventana.setVisible(true);
+
+            // Cierra el menú
+            frame.dispose();
+        });
+    }
+
+    private void onElegir(String nombreHeroe, HeroCard selected, HeroCard other) {
+        this.elegido = nombreHeroe;
+        selected.setSelected(true);
+        other.setSelected(false);
+        btnConfirmar.setEnabled(true);      // <- se habilita recién aquí
+        revalidate();
+        repaint();
+    }
+
+    // ---------- Card de selección ----------
+    static class HeroCard extends JPanel {
+        private boolean selected = false;
+        private final String nombre;
+        private final Image img;
+        private Runnable onSelect;
+
+        HeroCard(String nombre, String rutaImg) {
+            this.nombre = nombre;
+            Image tmp = null;
+            try {
+                java.net.URL u = getClass().getResource(rutaImg);
+                if (u != null) tmp = new ImageIcon(u).getImage();
+            } catch (Exception ignore) {}
+            this.img = tmp;
+
+            setOpaque(false);
+            setPreferredSize(new Dimension(400, 420));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            setToolTipText(nombre);
+
+            addMouseListener(new MouseAdapter() {
+                @Override public void mouseClicked(MouseEvent e) {
+                    if (onSelect != null) onSelect.run();
+                }
+            });
+        }
+
+        void addSelectionListener(Runnable r) { this.onSelect = r; }
+        void setSelected(boolean sel) { this.selected = sel; repaint(); }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Tarjeta
+            int arc = 22;
+            g2.setColor(new Color(0, 0, 0, selected ? 220 : 160));
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+
+            // Borde (más brillante si seleccionado)
+            g2.setStroke(new BasicStroke(3f));
+            g2.setColor(new Color(255, 215, 0, selected ? 230 : 160));
+            g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, arc, arc);
+
+            // Imagen centrada
+            if (img != null) {
+                int maxW = getWidth() - 40;
+                int maxH = getHeight() - 120;
+                int iw = img.getWidth(null);
+                int ih = img.getHeight(null);
+                double s = Math.min(maxW / (double)iw, maxH / (double)ih);
+                int dw = (int)Math.round(iw * s);
+                int dh = (int)Math.round(ih * s);
+                int x = (getWidth() - dw) / 2;
+                int y = (getHeight() - dh) / 2 - 10;
+                g2.drawImage(img, x, y, dw, dh, null);
+            }
+
+            // Nombre
+            g2.setFont(new Font("Consolas", Font.BOLD, 24));
+            String txt = nombre + (selected ? " ✓" : "");
+            int tw = g2.getFontMetrics().stringWidth(txt);
+            g2.setColor(Color.WHITE);
+            g2.drawString(txt, (getWidth() - tw) / 2, getHeight() - 28);
+
+            g2.dispose();
+        }
+    }
+}
