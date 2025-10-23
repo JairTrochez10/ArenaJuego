@@ -127,7 +127,13 @@ public class Monstruo {
                 if (vx==0 && vy==0) vy=1;
                 Proyectil pj = new Proyectil(x+ENEMY_SIZE/2, y+ENEMY_SIZE/2, vx, vy);
                 pj.daño = daño;
-                pj.conTamaño(8);
+
+                // === SPRITE DE ENEMIGO + ROTACIÓN ===
+                pj.setSprite(Proyectil.RUTA_PROY_ENEMY)
+                        .setRotateWithDirection(true)
+                        .setFacingOffsetDegrees(0)
+                        .conTamaño(7);
+
                 disparos.add(pj);
                 disparoCooldown = 60;
             }

@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="" />
+    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/JefeFinal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/JefeFinal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/Juego.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Juego.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/Monstruo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Monstruo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/Personajes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Personajes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/Proyectil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Proyectil.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +27,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "JairTrochez10"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/JairTrochez10/ArenaJuego.git",
+    "accountId": "37d88a64-4148-4bd0-9974-53adf1923f6f"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>

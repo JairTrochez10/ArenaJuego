@@ -18,6 +18,9 @@ public class Personajes {
 
     private ImageIcon sprite = new ImageIcon(getClass().getResource("/Imagenes/Kevin walk.gif"));
 
+    // === NUEVO: recordar héroe elegido para asignar sprite de proyectil ===
+    private String heroName = "Zorritas";
+
     // límites dinámicos (los manda Juego cada frame)
     private int ancho = 0, alto = 0, margen = 0;
 
@@ -31,17 +34,40 @@ public class Personajes {
         this.velocidad = 6;  // Juego la ajusta con syncPlayerSpeed()
     }
 
-    /** El menú te pasa el nombre; resolvemos sprite por varias rutas posibles. */
+    /** El menú te pasa el nombre exacto ("Zorritas" o "Larry"). */
     public void setHeroeSprite(String heroeNombre) {
         if (heroeNombre == null) return;
         String base = heroeNombre.trim();
+        this.heroName = base; // <<< guardar para decidir el proyectil
+
+        // 1) Mapa explícito
+        String[] preferidas = null;
+        if (base.equalsIgnoreCase("Zorritas")) {
+            preferidas = new String[] {
+                    "/Menu/imagen/Heroes/Kevin walk.gif",
+                    "/Imagenes/Kevin walk.gif"
+            };
+        } else if (base.equalsIgnoreCase("Larry")) {
+            preferidas = new String[] {
+                    "/Menu/imagen/Heroes/Squeletron.gif",
+                    "/Imagenes/Squeletron.gif"
+            };
+        }
+        if (preferidas != null) {
+            for (String r : preferidas) {
+                java.net.URL u = getClass().getResource(r);
+                if (u != null) { sprite = new ImageIcon(u); return; }
+            }
+        }
+
+        // 2) Fallbacks genéricos
         String[] rutas = {
-                "/Menu/imagen/Heroes/Kevin walk.gif",
-                "/Menu/imagen/Heroes/Squeletron.gif",
                 "/Imagenes/" + base + ".gif",
                 "/Imagenes/" + base + " walk.gif",
                 "/Imagenes/" + base + ".png",
-                "/Imagenes/Kevin walk.gif"
+                "/Menu/imagen/Heroes/" + base + ".gif",
+                "/Menu/imagen/Heroes/" + base + ".png",
+                "/Imagenes/Kevin walk.gif" // último recurso
         };
         for (String r : rutas) {
             java.net.URL u = getClass().getResource(r);
@@ -112,18 +138,25 @@ public class Personajes {
         int cx = x + SIZE/2, cy = y + SIZE/2, muzzle = 12;
         Proyectil p = new Proyectil(cx + dx*muzzle, cy + dy*muzzle, dx, dy);
         p.daño = 10;
-        p.conTamaño(8);
+
+        // === SPRITE POR HÉROE + ROTACIÓN ===
+        String rutaProj = ("Larry".equalsIgnoreCase(heroName))
+                ? Proyectil.RUTA_PROY_LARRY
+                : Proyectil.RUTA_PROY_ZORRITAS;
+
+        p.setSprite(rutaProj)
+                .setRotateWithDirection(true)
+                .setFacingOffsetDegrees(0) // ajusta si tu PNG “mira” ↑ (−90), ↓ (+90), ← (180)
+                .conTamaño(8);
+
         proyectiles.add(p);
     }
 
-    /** === NUEVO: habilidad tipo jefe (ráfaga circular + tiro dirigido) ===
-     *  Se llama desde Juego cuando presionas Q y la recarga está lista.
-     */
+    /** Habilidad (si la usas): ráfaga circular + tiro dirigido */
     public void activarHabilidad() {
         int cx = x + SIZE/2;
         int cy = y + SIZE/2;
 
-        // 1) Ráfaga circular (como el jefe)
         int n = 10;
         for (int i = 0; i < n; i++) {
             double ang = (Math.PI * 2.0) * i / n;
@@ -133,11 +166,10 @@ public class Personajes {
             Proyectil p = new Proyectil(cx, cy, vx, vy);
             p.velocidad = 11;
             p.daño = 12;
-            p.conTamaño(7);
+            p.conTamaño(7); // puedes asignar sprite también, si quieres
             proyectiles.add(p);
         }
 
-        // 2) Tiro dirigido fuerte en la dirección actual
         int dx = 0, dy = 1;
         switch (direccion) { case 1 -> dy = 1; case 2 -> dy = -1; case 3 -> {dx = -1; dy = 0;} case 4 -> {dx = 1; dy = 0;} }
         Proyectil fuerte = new Proyectil(cx, cy, dx, dy);

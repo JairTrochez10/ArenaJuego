@@ -63,7 +63,7 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
     private void init() {
         setFocusable(true);
         addKeyListener(this);
-        try { fondo = new ImageIcon(getClass().getResource("/Imagenes/fondodejuego.jpg")).getImage(); } catch (Exception ignore) {}
+        try { fondo = new ImageIcon(getClass().getResource("/Imagenes/Arena.jpg")).getImage(); } catch (Exception ignore) {}
 
         paola = new Personajes(300, 300, settings);
         paola.setHeroeSprite(heroeElegido);

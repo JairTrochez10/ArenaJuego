@@ -25,7 +25,7 @@ public class JefeFinal {
     public JefeFinal(int x, int y, GameSettings settings) {
         this.x = x; this.y = y;
         this.settings = (settings != null ? settings : GameSettings.fromDificultad("Media"));
-        java.net.URL u = getClass().getResource("/Imagenes/jefesinfondo.gif");
+        java.net.URL u = getClass().getResource("/Imagenes/JefeDif.gif");
         sprite = (u != null) ? new ImageIcon(u) : new ImageIcon();
     }
 
@@ -59,6 +59,13 @@ public class JefeFinal {
                     if (vx == 0 && vy == 0) vy = 1;
                     Proyectil p = new Proyectil(cx, cy, vx, vy);
                     p.velocidad = 10; p.daño = settings.bossBulletDamage;
+
+                    // sprite de proyectil del jefe (puedes crear otra ruta si quieres uno distinto)
+                    p.setSprite(Proyectil.RUTA_PROY_ENEMY)
+                            .setRotateWithDirection(true)
+                            .setFacingOffsetDegrees(0)
+                            .conTamaño(9);
+
                     disparos.add(p);
                 }
             } else {
@@ -67,6 +74,12 @@ public class JefeFinal {
                 if (vx == 0 && vy == 0) vy = 1;
                 Proyectil p = new Proyectil(cx, cy, vx, vy);
                 p.velocidad = 12; p.daño = settings.bossBulletDamage;
+
+                p.setSprite(Proyectil.RUTA_PROY_ENEMY)
+                        .setRotateWithDirection(true)
+                        .setFacingOffsetDegrees(0)
+                        .conTamaño(9);
+
                 disparos.add(p);
             }
             burst++;
