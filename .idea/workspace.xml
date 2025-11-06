@@ -4,13 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="">
+    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="Imagenes">
+      <change afterPath="$PROJECT_DIR$/src/Menu/NombreJugadorDialog.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Menu/MenuPersonajesPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Menu/MenuPersonajesPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Player/JefeFinal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/JefeFinal.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Player/Juego.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Juego.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Monstruo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Monstruo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Personajes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Personajes.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Player/Proyectil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Proyectil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/MainLauncher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/MainLauncher.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,46 +28,50 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "JairTrochez10"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JairTrochez10&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/JairTrochez10/ArenaJuego.git",
-    "accountId": "37d88a64-4148-4bd0-9974-53adf1923f6f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JairTrochez10/ArenaJuego.git&quot;,
+    &quot;accountId&quot;: &quot;37d88a64-4148-4bd0-9974-53adf1923f6f&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="346hSOw0QSFghikBKLj1UFLVCDW" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Juego.executor": "Run",
-    "Application.MainLauncher.executor": "Run",
-    "Application.sssJuego.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "git-widget-placeholder": "master",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/j/IdeaProjects/ArenaJuego",
-    "onboarding.tips.debug.path": "C:/Users/Oscar Josue/IdeaProjects/ArenaJuego/src/Main.java",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "settings.sync",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Juego.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainLauncher.executor&quot;: &quot;Run&quot;,
+    &quot;Application.sssJuego.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/j/IdeaProjects/ArenaJuego&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/Oscar Josue/IdeaProjects/ArenaJuego/src/Main.java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -82,6 +87,23 @@
       <option name="presentableId" value="Default" />
       <updated>1760539930784</updated>
     </task>
+    <task id="LOCAL-00001" summary="MODIFICACION DEL JEFE">
+      <option name="closed" value="true" />
+      <created>1761184710430</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1761184710430</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Imagenes">
+      <option name="closed" value="true" />
+      <created>1761184993429</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1761184993429</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -94,5 +116,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="MODIFICACION DEL JEFE" />
+    <MESSAGE value="Imagenes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Imagenes" />
   </component>
 </project>

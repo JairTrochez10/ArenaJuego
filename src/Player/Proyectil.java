@@ -10,26 +10,34 @@ public class Proyectil {
     public boolean activo = true;
     public int daño = 10;
 
-    private int size = 20;
+    // tamaño base (subido)
+    private int size = 48;
 
     // === Sprite opcional ===
-    private Image spriteImg = null;                // si es null, se dibuja el círculo
-    private boolean keepAspect = true;             // mantener proporción al escalar
-    private boolean rotateWithDirection = false;   // rotar según (dirX, dirY)
-    private double facingOffsetRad = 0.0;          // corrección de orientación del sprite
+    private Image spriteImg = null;                // si es null, se dibuja el circulo
+    private boolean keepAspect = true;             // mantener proporcion al escalar
+    private boolean rotateWithDirection = false;   // rotar segun (dirX, dirY)
+    private double facingOffsetRad = 0.0;          // correccion de orientacion del sprite
 
-    // Rutas públicas sugeridas (útiles desde otras clases)
+    // Rutas publicas sugeridas (utiles desde otras clases)
     public static final String RUTA_PROY_ZORRITAS = "/Imagenes/Proyectil.png";
     public static final String RUTA_PROY_LARRY    = "/Imagenes/proyectilhues.png";
     public static final String RUTA_PROY_ENEMY    = "/Imagenes/proyectil_enemy.png";
 
-    // límites globales para auto-destruir (los fija Juego cada frame)
+    // limites globales para auto-destruir (los fija Juego cada frame)
     private static int VP_W = 800, VP_H = 600, VP_MARGIN = 0;
+
+    // escala global (afecta a todos los proyectiles)
+    private static double ESCALA_GLOBAL = 1.0;
 
     public static void setViewportGlobal(int w, int h, int margen) {
         VP_W = Math.max(1, w);
         VP_H = Math.max(1, h);
         VP_MARGIN = Math.max(0, margen);
+    }
+
+    public static void setEscalaGlobal(double s) {
+        ESCALA_GLOBAL = Math.max(0.1, s);
     }
 
     public Proyectil(int x, int y, int dirX, int dirY) {
@@ -38,8 +46,8 @@ public class Proyectil {
         this.dirY = (dirX == 0 && dirY == 0) ? 1 : dirY;
     }
 
-    // === Configuración fluida ===
-    /** cambiar tamaño del proyectil (afecta sprite o círculo) */
+    // === Configuracion fluida ===
+    /** cambiar tamano del proyectil (afecta sprite o circulo) */
     public Proyectil conTamaño(int px) { this.size = Math.max(10, px); return this; }
 
     /** asignar sprite desde ruta de recursos */
@@ -54,19 +62,19 @@ public class Proyectil {
     /** asignar sprite desde Image ya cargado */
     public Proyectil setSprite(Image img) { this.spriteImg = img; return this; }
 
-    /** mantener proporción en el escalado */
+    /** mantener proporcion en el escalado */
     public Proyectil setKeepAspect(boolean keep) { this.keepAspect = keep; return this; }
 
-    /** activar rotación del sprite según la dirección */
+    /** activar rotacion del sprite segun la direccion */
     public Proyectil setRotateWithDirection(boolean rotate) { this.rotateWithDirection = rotate; return this; }
 
-    /** offset en grados si el PNG “mira” a otra dirección por defecto */
+    /** offset en grados si el PNG “mira” a otra direccion por defecto */
     public Proyectil setFacingOffsetDegrees(double deg) {
         this.facingOffsetRad = Math.toRadians(deg);
         return this;
     }
 
-    // === Lógica ===
+    // === Logica ===
     public void update() {
         x += dirX * velocidad;
         y += dirY * velocidad;
@@ -78,8 +86,12 @@ public class Proyectil {
     }
 
     public void draw(Graphics g) {
+        // aplicar escala global al tamano actual
+        int sizeEsc = (int) Math.round(size * ESCALA_GLOBAL);
+
         if (spriteImg != null) {
-            int dw = size, dh = size;
+            // tamaño fijo para sprites
+            int dw = 48, dh = 48;
             int iw = Math.max(1, spriteImg.getWidth(null));
             int ih = Math.max(1, spriteImg.getHeight(null));
             if (keepAspect) {
@@ -103,11 +115,18 @@ public class Proyectil {
                 g.drawImage(spriteImg, dx, dy, dw, dh, null);
             }
         } else {
-            // Fallback: círculo amarillo (tu comportamiento anterior)
+            // fallback: circulo amarillo
             g.setColor(Color.YELLOW);
-            g.fillOval(x - size/2, y - size/2, size, size);
+            g.fillOval(x - sizeEsc / 2, y - sizeEsc / 2, sizeEsc, sizeEsc);
         }
     }
 
-    public Rectangle getBounds() { return new Rectangle(x - size/2, y - size/2, size, size); }
+    public Rectangle getBounds() {
+        int sizeEsc = (int) Math.round(size * ESCALA_GLOBAL);
+        return new Rectangle(x - sizeEsc / 2, y - sizeEsc / 2, sizeEsc, sizeEsc);
+    }
 }
+
+// --- Ejemplo de uso ---
+// Proyectil p = new Proyectil(x, y, dirX, dirY)
+//     .setRotateWithDirection(true);

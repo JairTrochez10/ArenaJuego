@@ -51,6 +51,10 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
     private long abilityLastUsedMs = -100_000; // para que al inicio falte poco
     private static final String ABILITY_KEY_HINT = "Q";
 
+    // --- PAUSA ---
+    private boolean paused = false;
+    private final JButton btnPause = uiSmallButton("Pausa");
+
     public Juego(GameSettings settings, String heroe, String nombreJugador) {
         this.settings = settings != null ? settings : GameSettings.fromDificultad("Media");
         this.heroeElegido = heroe != null ? heroe : "Default";
@@ -75,6 +79,12 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
         // jugador más rápido que enemigos (2x y min +5)
         syncPlayerSpeed();
 
+        // --- PAUSA: botón
+        setLayout(null);
+        btnPause.setFocusable(false);
+        btnPause.addActionListener(e -> togglePause());
+        add(btnPause);
+
         timer = new Timer(16, this);
         timer.start();
 
@@ -93,6 +103,13 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
         paola.setVelocidad(playerTarget);
     }
 
+    // --- PAUSA: mantener botón en esquina
+    @Override public void doLayout() {
+        super.doLayout();
+        int w = getWidth();
+        btnPause.setBounds(Math.max(12, w - 110), 12, 96, 36);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         Proyectil.setViewportGlobal(getWidth(), getHeight(), margen);
@@ -106,6 +123,12 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
         paola.setLimitesPantalla(getWidth(), getHeight(), margen);
         enemigos.setLimitesPantalla(getWidth(), getHeight(), margen);
         if (jefeActivo && jefeFinal != null) jefeFinal.setLimitesPantalla(getWidth(), getHeight(), margen);
+
+        // --- PAUSA: cortar la lógica
+        if (paused) {
+            repaint();
+            return;
+        }
 
         // mantener ventaja en tiempo real
         syncPlayerSpeed();
@@ -335,6 +358,34 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
         return b;
     }
 
+    // --- PAUSA: botón pequeño
+    private static JButton uiSmallButton(String txt) {
+        JButton b = new JButton(txt) {
+            @Override protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(0, 0, 0, 200));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.setStroke(new BasicStroke(2f));
+                g2.setColor(new Color(255, 215, 0, 200));
+                g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 14, 14);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        b.setContentAreaFilled(false);
+        b.setOpaque(false);
+        b.setRolloverEnabled(false);
+        b.setFocusPainted(false);
+        b.setBorderPainted(false);
+        b.setFocusable(false);
+        b.setForeground(Color.WHITE);
+        b.setFont(new Font("Consolas", Font.BOLD, 16));
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
+        return b;
+    }
+
     private void reiniciarPartida() {
         ronda = 1; multiplicadorRonda = 1;
         roundMulEnemy = 1.0; roundMulBoss = 1.0;
@@ -441,6 +492,19 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
             g.drawString(t, x, y);
         }
 
+        // --- PAUSA: overlay
+        if (paused && !gameOver) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setColor(new Color(0,0,0,140));
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            g2.setFont(new Font("Consolas", Font.BOLD, 48));
+            String txt = "PAUSA";
+            int w = g2.getFontMetrics().stringWidth(txt);
+            g2.setColor(Color.WHITE);
+            g2.drawString(txt, getWidth()/2 - w/2, getHeight()/2);
+            g2.dispose();
+        }
+
         if (gameOver) {
             g.setFont(new Font("Arial", Font.BOLD, 50));
             int w = g.getFontMetrics().stringWidth("GAME OVER");
@@ -463,12 +527,14 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
             case KeyEvent.VK_SPACE -> paola.disparando = true;
             case KeyEvent.VK_Q -> { // === NUEVO: activar habilidad si está lista
                 long now = System.currentTimeMillis();
-                if (now - abilityLastUsedMs >= abilityCooldownMs && !gameOver) {
+                if (now - abilityLastUsedMs >= abilityCooldownMs && !gameOver && !paused) {
                     paola.activarHabilidad();
                     abilityLastUsedMs = now;
                     showToast("¡Habilidad!", 800);
                 }
             }
+            // --- PAUSA: tecla P
+            case KeyEvent.VK_P -> togglePause();
             case KeyEvent.VK_R -> { if (gameOver) reiniciarPartida(); }
             case KeyEvent.VK_ESCAPE -> {
                 JFrame top = (JFrame) SwingUtilities.getWindowAncestor(this);
@@ -486,4 +552,12 @@ public class Juego extends JPanel implements ActionListener, KeyListener {
         }
     }
     @Override public void keyTyped(KeyEvent e) {}
+
+    // --- PAUSA: helpers
+    private void togglePause() {
+        if (gameOver) return;
+        paused = !paused;
+        btnPause.setText(paused ? "Reanudar" : "Pausa");
+        repaint();
+    }
 }

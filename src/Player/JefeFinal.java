@@ -21,6 +21,9 @@ public class JefeFinal {
     private int shootCooldown = 0;
     private int burst = 0;
 
+    // Solo mirar izquierda/derecha
+    private boolean facingLeft = false;
+
     /** Tu Juego llama este ctor (x,y,settings). */
     public JefeFinal(int x, int y, GameSettings settings) {
         this.x = x; this.y = y;
@@ -38,17 +41,25 @@ public class JefeFinal {
     }
 
     public void update(Personajes jugador) {
-        // moverse hacia el jugador
-        double dx = jugador.x - x, dy = jugador.y - y;
+        // mover hacia el jugador
+        double dx = jugador.x - x;
+        double dy = jugador.y - y;
         double dist = Math.hypot(dx, dy);
+
         if (dist > 1) {
-            x += (int) Math.round((dx / dist) * speedNow());
-            y += (int) Math.round((dy / dist) * speedNow());
+            int step = speedNow();
+            x += (int) Math.round((dx / dist) * step);
+            y += (int) Math.round((dy / dist) * step);
         }
 
-        // disparo: dirigido + ráfaga cada 3 disparos
-        if (shootCooldown > 0) shootCooldown--;
-        else {
+        // decidir hacia donde "mira" (solo horizontal)
+        int bossCenterX = x + SIZE / 2;
+        facingLeft = jugador.x < bossCenterX;
+
+        // disparo: dirigido + rafaga cada 3 disparos
+        if (shootCooldown > 0) {
+            shootCooldown--;
+        } else {
             int cx = x + SIZE/2, cy = y + SIZE/2;
             if (burst % 3 == 2) {
                 int n = 10;
@@ -58,9 +69,9 @@ public class JefeFinal {
                     int vy = (int) Math.round(Math.sin(ang));
                     if (vx == 0 && vy == 0) vy = 1;
                     Proyectil p = new Proyectil(cx, cy, vx, vy);
-                    p.velocidad = 10; p.daño = settings.bossBulletDamage;
+                    p.velocidad = 10;
+                    p.daño = settings.bossBulletDamage;
 
-                    // sprite de proyectil del jefe (puedes crear otra ruta si quieres uno distinto)
                     p.setSprite(Proyectil.RUTA_PROY_ENEMY)
                             .setRotateWithDirection(true)
                             .setFacingOffsetDegrees(0)
@@ -73,7 +84,8 @@ public class JefeFinal {
                 int vy = (int) Math.round(dy / Math.max(1.0, dist));
                 if (vx == 0 && vy == 0) vy = 1;
                 Proyectil p = new Proyectil(cx, cy, vx, vy);
-                p.velocidad = 12; p.daño = settings.bossBulletDamage;
+                p.velocidad = 12;
+                p.daño = settings.bossBulletDamage;
 
                 p.setSprite(Proyectil.RUTA_PROY_ENEMY)
                         .setRotateWithDirection(true)
@@ -86,13 +98,14 @@ public class JefeFinal {
             shootCooldown = 30; // ~0.5 s
         }
 
+        // actualizar proyectiles
         for (int i = 0; i < disparos.size(); i++) {
             Proyectil d = disparos.get(i);
             d.update();
             if (!d.activo) { disparos.remove(i); i--; }
         }
 
-        // clamp (si está configurado)
+        // clamp (si esta configurado)
         if (ancho > 0 && alto > 0) {
             x = Math.max(margen, Math.min(x, ancho - margen - SIZE));
             y = Math.max(margen, Math.min(y, alto - margen - SIZE));
@@ -100,11 +113,24 @@ public class JefeFinal {
     }
 
     public void draw(Graphics g) {
-        g.drawImage(sprite.getImage(), x, y, SIZE, SIZE, null);
+        Image img = sprite.getImage();
+
+        // INVERTIDO: si el jugador esta a la derecha (!facingLeft), ahora espejamos (ancho negativo)
+        if (!facingLeft) {
+            // mirar a la derecha -> espejado horizontal
+            g.drawImage(img, x + SIZE, y, -SIZE, SIZE, null);
+        } else {
+            // mirar a la izquierda -> dibujo normal
+            g.drawImage(img, x, y, SIZE, SIZE, null);
+        }
+
+        // barra de vida
         int barW = 100, barH = 8;
         int barX = x, barY = y - 10;
         g.setColor(Color.RED);   g.fillRect(barX, barY, barW, barH);
         g.setColor(Color.GREEN); g.fillRect(barX, barY, (int)Math.round(barW * (vida / 300.0)), barH);
+
+        // proyectiles
         for (Proyectil d : disparos) d.draw(g);
     }
 
