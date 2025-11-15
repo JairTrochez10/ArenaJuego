@@ -1,7 +1,7 @@
 package Menu;
 
 import Player.GameSettings;
-import Player.Juego;
+import Player.GameFrameNiveles;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,10 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Menu de seleccion de personaje con preview + nombre abajo:
- * - Sin seleccion por defecto
- * - Confirmar deshabilitado hasta elegir y escribir nombre valido
- * - Boton Volver regresa a Dificultad
+ * Menu de seleccion de personaje con preview + nombre abajo.
  */
 public class MenuPersonajesPanel extends JPanel {
 
@@ -28,13 +25,12 @@ public class MenuPersonajesPanel extends JPanel {
     private final MenuPrincipal frame;
     private final GameSettings settings;
 
-    private String elegido = null; // "Zorritas" o "Larry"
+    private String elegido = null;
     private String elegidoRuta = null;
 
     private final JButton btnConfirmar = MenuPrincipal.boton("Confirmar");
     private final JButton btnVolver    = MenuPrincipal.boton("Volver");
 
-    // Preview + nombre (previewNombre inicia vacio/oculto para evitar duplicados)
     private final JLabel previewImg = new JLabel();
     private final JLabel previewNombre = new JLabel(" ", SwingConstants.CENTER);
     private final JTextField txtNombre = new JTextField();
@@ -50,7 +46,6 @@ public class MenuPersonajesPanel extends JPanel {
         fondo.setLayout(new BorderLayout());
         add(fondo, BorderLayout.CENTER);
 
-        // Header
         JLabel titulo = new JLabel("Elige tu Personaje (" + settings.dificultadName + ")", SwingConstants.CENTER);
         titulo.setFont(new Font("Consolas", Font.BOLD, 32));
         titulo.setForeground(Color.WHITE);
@@ -58,7 +53,6 @@ public class MenuPersonajesPanel extends JPanel {
         header.setBorder(BorderFactory.createEmptyBorder(16,16,8,16));
         header.add(titulo, BorderLayout.CENTER);
 
-        // Cards
         JPanel cards = new JPanel(new GridLayout(1,2,24,0)) { @Override public boolean isOpaque(){ return false; } };
         cards.setBorder(BorderFactory.createEmptyBorder(20, 60, 12, 60));
 
@@ -68,7 +62,6 @@ public class MenuPersonajesPanel extends JPanel {
         cards.add(card1);
         cards.add(card2);
 
-        // Bottom: preview + nombre + botones
         JPanel bottom = new JPanel(new BorderLayout(0,10)) { @Override public boolean isOpaque(){ return false; } };
         bottom.setBorder(BorderFactory.createEmptyBorder(8, 60, 24, 60));
 
@@ -79,7 +72,7 @@ public class MenuPersonajesPanel extends JPanel {
         previewNombre.setForeground(Color.WHITE);
         previewNombre.setFont(new Font("Consolas", Font.BOLD, 20));
         previewNombre.setBorder(new EmptyBorder(4,0,8,0));
-        previewNombre.setVisible(false); // <<--- evita el duplicado inicial
+        previewNombre.setVisible(false);
 
         JPanel nombrePanel = new JPanel(new BorderLayout(8,0)) { @Override public boolean isOpaque(){ return false; } };
         JLabel lblNombre = new JLabel("Nombre del jugador:");
@@ -113,7 +106,6 @@ public class MenuPersonajesPanel extends JPanel {
 
         preview.add(centerPreview, BorderLayout.CENTER);
 
-        // Footer
         JPanel footer = new JPanel() { @Override public boolean isOpaque(){ return false; } };
         footer.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
         Dimension BTN = new Dimension(280, 56);
@@ -132,7 +124,6 @@ public class MenuPersonajesPanel extends JPanel {
         fondo.add(cards,  BorderLayout.CENTER);
         fondo.add(bottom, BorderLayout.SOUTH);
 
-        // Listeners
         card1.addSelectionListener(() -> onElegir("Zorritas", HEROE1_IMG, card1, card2));
         card2.addSelectionListener(() -> onElegir("Larry",    HEROE2_IMG, card2, card1));
 
@@ -152,7 +143,7 @@ public class MenuPersonajesPanel extends JPanel {
 
         previewImg.setIcon(cargarIcono(rutaImg, 260, 260));
         previewNombre.setText(nombreHeroe);
-        previewNombre.setVisible(true); // <<--- se muestra solo tras elegir
+        previewNombre.setVisible(true);
 
         validarForm();
         revalidate();
@@ -161,16 +152,12 @@ public class MenuPersonajesPanel extends JPanel {
 
     private void onConfirmar() {
         if (!validarForm()) return;
+
         String nombre = txtNombre.getText().trim();
         if (nombre.isEmpty()) nombre = "Invitado";
 
-        JFrame ventana = new JFrame("Arena - Dungeon Enemigos");
-        Player.Juego game = new Juego(settings, elegido, nombre);
-        ventana.setContentPane(game);
-        ventana.setUndecorated(true);
-        ventana.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventana.setVisible(true);
+        GameFrameNiveles ventanaJuego = new GameFrameNiveles(settings, elegido, nombre);
+        ventanaJuego.setVisible(true);
 
         frame.dispose();
     }
@@ -271,7 +258,6 @@ public class MenuPersonajesPanel extends JPanel {
                 return new ImageIcon(esc);
             }
         } catch (Exception ignore) {}
-        // fallback si no hay imagen
         java.awt.image.BufferedImage bi = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = bi.createGraphics();
         g2.setColor(new Color(60,60,60)); g2.fillRoundRect(0,0,w,h,24,24);
@@ -302,7 +288,6 @@ public class MenuPersonajesPanel extends JPanel {
         });
     }
 
-    // DocumentListener simplificado
     private static class SimpleDocListener implements javax.swing.event.DocumentListener {
         private final Runnable r;
         SimpleDocListener(Runnable r){ this.r = r; }

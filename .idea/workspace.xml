@@ -5,12 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="Imagenes">
-      <change afterPath="$PROJECT_DIR$/src/Menu/NombreJugadorDialog.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/Arena1.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/Arena2.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/Arena3.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/Arena4.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/Arena5.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/ArenaBase.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/GameFrameNiveles.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Player/LevelListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Menu/MenuPersonajesPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Menu/MenuPersonajesPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/JefeFinal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/JefeFinal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Juego.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Juego.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Proyectil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Proyectil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Menu/MenuPuntuacionesPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Menu/MenuPuntuacionesPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/Juego.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/Monstruo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Monstruo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/MainLauncher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/MainLauncher.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,7 +44,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/JairTrochez10/ArenaJuego.git&quot;,
-    &quot;accountId&quot;: &quot;37d88a64-4148-4bd0-9974-53adf1923f6f&quot;
+    &quot;accountId&quot;: &quot;45f8ce7b-deb9-446e-91af-59d59773d336&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -75,7 +82,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
       </set>
     </attachedChunks>
   </component>

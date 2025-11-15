@@ -20,6 +20,9 @@ import java.util.List;
  * Mostramos MEJOR marca por jugador (máx. puntos; en empate, menor tiempo).
  * "Eliminar seleccionado" borra TODAS las partidas de ese jugador en el CSV.
  * "Eliminar todos" vacía el CSV.
+ *
+ * Ahora la tabla también muestra la columna "Resultado"
+ * (GAME_OVER o VICTORY) y resalta las victorias en dorado suave.
  */
 public class MenuPuntuacionesPanel extends JPanel {
 
@@ -32,7 +35,7 @@ public class MenuPuntuacionesPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel model;
-    private JScrollPane scrollPane; // ⬅️ guardamos el scroll para estilar sin NPE
+    private JScrollPane scrollPane; // guardamos el scroll para estilar sin NPE
 
     public MenuPuntuacionesPanel(JFrame frame) {
         this.frame = frame;
@@ -52,7 +55,7 @@ public class MenuPuntuacionesPanel extends JPanel {
         // Contenedor "glass"
         JPanel glass = new RoundedGlassPanel();
         glass.setLayout(new BorderLayout());
-        glass.setPreferredSize(new Dimension(900, 560));
+        glass.setPreferredSize(new Dimension(980, 580));
         glass.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
 
         // Cabecera
@@ -62,7 +65,7 @@ public class MenuPuntuacionesPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout()) { @Override public boolean isOpaque(){ return false; } };
         header.add(titulo, BorderLayout.CENTER);
 
-        // Tabla + ScrollPane (primero creamos el scroll, luego estilizamos)
+        // Tabla + ScrollPane
         model = buildModel();
         table = new JTable(model);
         scrollPane = new JScrollPane(table);
@@ -70,7 +73,7 @@ public class MenuPuntuacionesPanel extends JPanel {
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        styleTable(table, scrollPane);  // ⬅️ estiliza sin tocar getParent()
+        styleTable(table, scrollPane);
 
         // Botones
         JButton btnVolver = MenuPrincipal.boton("Volver");
@@ -149,14 +152,19 @@ public class MenuPuntuacionesPanel extends JPanel {
 
     // --------- Construcción del modelo (mejor marca por jugador) ---------
     private DefaultTableModel buildModel() {
-        String[] cols = {"#", "Jugador", "Dificultad", "Puntuación", "Tiempo"};
-        DefaultTableModel m = new DefaultTableModel(cols, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
+        // Se agrega columna "Resultado"
+        String[] cols = {"#", "Jugador", "Dificultad", "Puntuación", "Tiempo", "Resultado"};
+        DefaultTableModel m = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
 
         Map<String, Score> bestByPlayer = new HashMap<>();
         for (Score s : loadScores()) {
             Score cur = bestByPlayer.get(s.jugador);
             if (cur == null) bestByPlayer.put(s.jugador, s);
             else if (s.puntos > cur.puntos || (s.puntos == cur.puntos && s.segundos < cur.segundos)) {
+                // misma lógica de "mejor marca", el estado (GAME_OVER/VICTORY) no cambia el ranking,
+                // pero sí se mostrará en la tabla.
                 bestByPlayer.put(s.jugador, s);
             }
         }
@@ -165,7 +173,14 @@ public class MenuPuntuacionesPanel extends JPanel {
 
         int rank = 1;
         for (Score s : list) {
-            m.addRow(new Object[]{ rank++, s.jugador, s.dificultad, s.puntos, fmtTime(s.segundos) });
+            m.addRow(new Object[]{
+                    rank++,
+                    s.jugador,
+                    s.dificultad,
+                    s.puntos,
+                    fmtTime(s.segundos),
+                    s.estado // GAME_OVER o VICTORY
+            });
             if (rank > 100) break; // por si hay muchísimos
         }
         return m;
@@ -175,12 +190,12 @@ public class MenuPuntuacionesPanel extends JPanel {
         DefaultTableModel m = buildModel();
         table.setModel(m);
         model = m;
-        styleTable(table, scrollPane); // re-aplica estilo seguro
+        styleTable(table, scrollPane); // re-aplica estilo
         revalidate();
         repaint();
     }
 
-    // --------- Estilizar tabla (sin usar getParent) ---------
+    // --------- Estilizar tabla ---------
     private void styleTable(JTable t, JScrollPane sp) {
         t.setRowHeight(26);
         t.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -199,24 +214,48 @@ public class MenuPuntuacionesPanel extends JPanel {
         th.setReorderingAllowed(false);
         th.setPreferredSize(new Dimension(th.getPreferredSize().width, 32));
 
-        // Zebra striping
+        // Zebra striping + resaltar VICTORY
         DefaultTableCellRenderer zebra = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(JTable table, Object value,
-                                                                     boolean isSelected, boolean hasFocus, int row, int column) {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (c instanceof JComponent jc) jc.setOpaque(false);
                 setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-                setHorizontalAlignment(column == 0 || column == 3 ? SwingConstants.CENTER : SwingConstants.LEFT);
+
+                // Centrar columnas numéricas y de resultado
+                if (column == 0 || column == 3 || column == 4 || column == 5) {
+                    setHorizontalAlignment(SwingConstants.CENTER);
+                } else {
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                }
+
                 setForeground(Color.WHITE);
+
+                String resultado = "";
+                int colResultado = 5;
+                if (table.getColumnCount() > colResultado) {
+                    Object resVal = table.getValueAt(row, colResultado);
+                    resultado = resVal == null ? "" : resVal.toString().trim();
+                }
+
                 if (isSelected) {
-                    setBackground(new Color(255, 215, 0, 80));
+                    setBackground(new Color(255, 215, 0, 120));
                     setOpaque(true);
                 } else {
-                    if (row % 2 == 0) {
-                        setBackground(new Color(255, 255, 255, 28));
+                    // Si es victoria, fondo dorado suave
+                    if ("VICTORY".equalsIgnoreCase(resultado)) {
+                        setBackground(new Color(255, 215, 0, 55));
                         setOpaque(true);
                     } else {
-                        setOpaque(false);
+                        // Zebra normal
+                        if (row % 2 == 0) {
+                            setBackground(new Color(255, 255, 255, 28));
+                            setOpaque(true);
+                        } else {
+                            setOpaque(false);
+                        }
                     }
                 }
                 return this;
@@ -226,18 +265,23 @@ public class MenuPuntuacionesPanel extends JPanel {
             t.getColumnModel().getColumn(i).setCellRenderer(zebra);
         }
 
-        // Anchuras
-        t.getColumnModel().getColumn(0).setPreferredWidth(40);  // #
-        t.getColumnModel().getColumn(1).setPreferredWidth(240); // Jugador
-        t.getColumnModel().getColumn(2).setPreferredWidth(120); // Dificultad
-        t.getColumnModel().getColumn(3).setPreferredWidth(120); // Puntuación
-        t.getColumnModel().getColumn(4).setPreferredWidth(120); // Tiempo
+        // Anchuras sugeridas
+        t.getColumnModel().getColumn(0).setPreferredWidth(40);   // #
+        t.getColumnModel().getColumn(1).setPreferredWidth(240);  // Jugador
+        t.getColumnModel().getColumn(2).setPreferredWidth(120);  // Dificultad
+        t.getColumnModel().getColumn(3).setPreferredWidth(120);  // Puntuación
+        t.getColumnModel().getColumn(4).setPreferredWidth(120);  // Tiempo
+        t.getColumnModel().getColumn(5).setPreferredWidth(120);  // Resultado
     }
 
     static class HeaderRenderer implements TableCellRenderer {
         private final TableCellRenderer delegate;
         HeaderRenderer(TableCellRenderer d){ this.delegate = d; }
-        @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
             Component c = delegate.getTableCellRendererComponent(table, value, false, false, row, column);
             JLabel lbl = (c instanceof JLabel) ? (JLabel)c : new JLabel(String.valueOf(value), SwingConstants.CENTER);
             lbl.setOpaque(true);
@@ -291,8 +335,9 @@ public class MenuPuntuacionesPanel extends JPanel {
 
     // ==== Lectura CSV -> mejor marca por jugador ====
     static class Score {
-        String jugador, dificultad;
-        int puntos; long segundos;
+        String jugador, dificultad, estado;
+        int puntos;
+        long segundos;
     }
 
     private static List<Score> loadScores() {
@@ -306,10 +351,11 @@ public class MenuPuntuacionesPanel extends JPanel {
                     String[] c = ln.split(",", -1);
                     if (c.length < 6) continue;
                     Score s = new Score();
-                    s.jugador = c[1].trim();
+                    s.jugador    = c[1].trim();
                     s.dificultad = c[2].trim();
                     try { s.puntos   = Integer.parseInt(c[3].trim()); } catch (Exception ignore) { s.puntos = 0; }
-                    try { s.segundos = Long.parseLong(c[4].trim()); } catch (Exception ignore) { s.segundos = 0; }
+                    try { s.segundos = Long.parseLong(c[4].trim()); }  catch (Exception ignore) { s.segundos = 0; }
+                    s.estado = c[5].trim(); // GAME_OVER o VICTORY
                     list.add(s);
                 }
             }
