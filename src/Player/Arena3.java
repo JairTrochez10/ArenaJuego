@@ -24,7 +24,7 @@ import java.util.List;
 public class Arena3 extends ArenaBase {
 
     // ====== Rutas de assets de la Zona 3 ======
-    private static final String R_FONDO    = "/Imagenes/Zona3/fondo_ojos.gif";
+    private static final String R_FONDO    = "/Imagenes/Zona3/ARENA3S.png";
     private static final String R_OJOTE    = "/Imagenes/Zona3/ojote_robot.gif";
     private static final String R_LASER    = "/Imagenes/Zona3/laser_purpura.gif";
     private static final String R_AZUL     = "/Imagenes/Zona3/enemigo_azul.gif";
@@ -44,6 +44,9 @@ public class Arena3 extends ArenaBase {
 
     // Jefe de la arena 3
     private BossOjote bossOjote;
+
+    // Cooldown global para daño cuerpo a cuerpo (para que no pegue cada frame)
+    private int meleeCooldown = 0; // en ticks de timer (~16ms c/u)
 
     // ----------------- Constructor -----------------
     public Arena3(GameSettings settings,
@@ -74,6 +77,7 @@ public class Arena3 extends ArenaBase {
         touchCooldown = 0;
         toastMsg = null;
         toastUntilMs = 0L;
+        meleeCooldown = 0;
 
         // Vida del jugador
         jugador.vida = jugador.vidaMax;
@@ -81,7 +85,6 @@ public class Arena3 extends ArenaBase {
             jugador.vida = Math.min(jugador.vidaMax, vidaInicial);
         }
 
-        // Limites y limpieza de enemigos genéricos
         enemigos.setLimitesPantalla(getWidth(), getHeight(), margen);
         enemigos.enemigos.clear();
 
@@ -122,25 +125,25 @@ public class Arena3 extends ArenaBase {
         int w = Math.max(getWidth(), 1200);
         int h = Math.max(getHeight(), 700);
 
-        // Ojo caminante (varios)
+        // Ojo caminante (varios) - vida base 35 (definida en Enemigo3)
         for (int i = 0; i < 2 * mult + 2; i++) {
             Point p = pickSpawn(w, h);
             enemigosZ3.add(new OjoCaminante(p.x, p.y, R_OJO_WALK, R_OJO_HIT));
         }
-        // Rojos pequeños (rápidos, disparan)
+        // Rojos pequeños (rápidos, disparan) VIDA: 30
         for (int i = 0; i < 2 * mult + 2; i++) {
             Point p = pickSpawn(w, h);
-            enemigosZ3.add(new RojoShooter(p.x, p.y, R_ROJO_P, 42, 6, 6, 50));
+            enemigosZ3.add(new RojoShooter(p.x, p.y, R_ROJO_P, 30, 4, 2, 55));
         }
-        // Rojos grandes (lentos, duros, disparan más fuerte)
+        // Rojos grandes (lentos, duros, disparan más fuerte) VIDA: 55
         for (int i = 0; i < 1 * mult + 1; i++) {
             Point p = pickSpawn(w, h);
-            enemigosZ3.add(new RojoShooter(p.x, p.y, R_ROJO_G, 80, 3, 10, 70));
+            enemigosZ3.add(new RojoShooter(p.x, p.y, R_ROJO_G, 55, 3, 3, 75));
         }
-        // Azules (lanzan rayo láser)
+        // Azules (lanzan rayo láser) VIDA: 40
         for (int i = 0; i < 1 * mult + 1; i++) {
             Point p = pickSpawn(w, h);
-            enemigosZ3.add(new AzulLaser(p.x, p.y, R_AZUL, 60, 3, 1500, 2200)); // cd min/max
+            enemigosZ3.add(new AzulLaser(p.x, p.y, R_AZUL, 40, 3, 1600, 2300)); // cd min/max
         }
 
         // Curación +100 HP por ronda
@@ -194,14 +197,20 @@ public class Arena3 extends ArenaBase {
             // Jugador
             jugador.update();
 
+            // Cooldown de cuerpo a cuerpo global
+            if (meleeCooldown > 0) meleeCooldown--;
+
             // Enemigos de la zona 3
             for (int i = 0; i < enemigosZ3.size(); i++) {
                 Enemigo3 en = enemigosZ3.get(i);
                 en.update(jugador, lasers);
 
-                // choque cuerpo a cuerpo
+                // choque cuerpo a cuerpo con cooldown
                 if (en.getBounds().intersects(jugador.getBounds())) {
-                    jugador.recibirDaño(en.contactDamage());
+                    if (meleeCooldown == 0) {
+                        jugador.recibirDaño(en.contactDamage());
+                        meleeCooldown = 18; // ~18 ticks * 16ms ≈ 0.3s entre golpes
+                    }
                 }
 
                 if (en.muerto()) {
@@ -465,13 +474,13 @@ public class Arena3 extends ArenaBase {
     //  Enemigos y proyectiles especiales de la Zona 3
     // =====================================================================
 
-    /** Base de enemigo de la Zona 3 (daño parecido a otros enemigos). */
+    /** Base de enemigo de la Zona 3 (daño muy suave, poca vida). */
     private abstract static class Enemigo3 {
         int x, y;
         int w = 56, h = 56;
-        int vida = 50;
+        int vida = 35;   // ANTES 50 -> ahora menos vida
         int velocidad = 3;
-        int daño = 3;  // daño de contacto suave
+        int daño = 2;    // contacto MUY bajo
         Image sprite;
 
         Enemigo3(int x, int y, String ruta) {
@@ -493,12 +502,13 @@ public class Arena3 extends ArenaBase {
             if (sprite != null) {
                 g.drawImage(sprite, x, y, w, h, null);
             }
-            // barra de vida
+            // barra de vida (ajustada al nuevo máximo aproximado 35)
             g.setColor(Color.red);
             g.fillRect(x + (w - 40) / 2, y - 8, 40, 6);
             g.setColor(Color.green);
+            double maxRef = 35.0; // referencia para barra
             g.fillRect(x + (w - 40) / 2, y - 8,
-                    (int) Math.round(40 * (vida / 50.0)), 6);
+                    (int) Math.round(40 * (vida / maxRef)), 6);
         }
     }
 
@@ -509,7 +519,7 @@ public class Arena3 extends ArenaBase {
 
         AzulLaser(int x, int y, String r, int vida, int vel, int cdMinMs, int cdMaxMs) {
             super(x, y, r);
-            this.vida = vida;
+            this.vida = vida;   // 40
             this.velocidad = vel;
             this.cdMin = cdMinMs;
             this.cdMax = cdMaxMs;
@@ -533,7 +543,7 @@ public class Arena3 extends ArenaBase {
                         vx, vy,
                         R_LASER,
                         900,
-                        5   // daño igual al láser base
+                        3   // daño muy moderado
                 ));
                 nextShot = System.currentTimeMillis()
                         + (cdMin + (int) (Math.random() * (cdMax - cdMin)));
@@ -549,11 +559,12 @@ public class Arena3 extends ArenaBase {
         Image fireball;
         final List<Proyectil> proyectilesEnemigos = new ArrayList<>();
 
-        RojoShooter(int x, int y, String r, int vida, int vel, int dmg, int cd) {
+        RojoShooter(int x, int y, String r, int vida, int vel, int dmgContacto, int cd) {
             super(x, y, r);
-            this.vida = vida;
+            this.vida = vida;      // 30 o 55 según el caso
             this.velocidad = vel;
-            this.daño = dmg;
+            // contacto aún más bajo:
+            this.daño = 2;
             this.disparoEvery = cd;
             try {
                 fireball = new ImageIcon(getClass().getResource(R_FIREBALL)).getImage();
@@ -573,7 +584,7 @@ public class Arena3 extends ArenaBase {
                 int vy = (int) Math.signum(dy);
                 if (vx == 0 && vy == 0) vy = 1;
                 Proyectil pr = new Proyectil(x + w / 2, y + h / 2, vx, vy);
-                pr.daño = 4;  // daño suave, un poco más que contacto
+                pr.daño = 3;  // bola de fuego suave
                 pr.conTamaño(projSize)
                         .setSprite(fireball)
                         .setRotateWithDirection(true);
@@ -633,9 +644,8 @@ public class Arena3 extends ArenaBase {
                 if ((tick++ % 20) == 0) {
                     x += (int) Math.round((velocidad + 3) * dx / dist);
                     y += (int) Math.round((velocidad + 3) * dy / dist);
-                    if (getBounds().intersects(jugador.getBounds())) {
-                        jugador.recibirDaño(3); // aún más bajo, similar a un golpe normal
-                    }
+                    // el daño cuerpo a cuerpo ahora se maneja arriba,
+                    // en actionPerformed, con el cooldown global meleeCooldown
                 }
             }
         }
@@ -653,7 +663,7 @@ public class Arena3 extends ArenaBase {
         int x, y, vx, vy;
         int len = 800;
         int grosor = 36;
-        int daño = 5;               // daño base moderado
+        int daño = 3;               // daño base MUY moderado
         long until;
         boolean activo = true;
         boolean haGolpeado = false; // para que solo pegue 1 vez
@@ -711,7 +721,7 @@ public class Arena3 extends ArenaBase {
     private class BossOjote {
         int w = 180, h = 180;
         int x, y;
-        int vida = 500;
+        int vida = 350;   // ANTES 500 -> ahora menos tanque
 
         int ancho, alto, margenLocal;
         Image sprite;
@@ -748,11 +758,11 @@ public class Arena3 extends ArenaBase {
                         -1, 0,
                         R_LASER,
                         1200,
-                        7   // sigue siendo un poco más fuerte, pero ya no borra la vida
+                        4   // un poco más fuerte, pero ya súper nerfeado
                 );
                 l.grosor = 56;
                 lasers.add(l);
-                nextLaser = System.currentTimeMillis() + 2200;
+                nextLaser = System.currentTimeMillis() + 2300;
             }
 
             // invocación de minions
@@ -762,11 +772,11 @@ public class Arena3 extends ArenaBase {
                 if (r < 0.33) {
                     pool.add(new OjoCaminante(pSpawn.x, pSpawn.y, R_OJO_WALK, R_OJO_HIT));
                 } else if (r < 0.66) {
-                    pool.add(new RojoShooter(pSpawn.x, pSpawn.y, R_ROJO_P, 45, 6, 7, 60));
+                    pool.add(new RojoShooter(pSpawn.x, pSpawn.y, R_ROJO_P, 30, 4, 2, 65));
                 } else {
-                    pool.add(new AzulLaser(pSpawn.x, pSpawn.y, R_AZUL, 60, 3, 1300, 2000));
+                    pool.add(new AzulLaser(pSpawn.x, pSpawn.y, R_AZUL, 40, 3, 1500, 2300));
                 }
-                nextSummon = System.currentTimeMillis() + 2500;
+                nextSummon = System.currentTimeMillis() + 2600;
             }
         }
 
@@ -790,7 +800,7 @@ public class Arena3 extends ArenaBase {
             g.setColor(Color.red);
             g.fillRect(x, y - 12, w, 8);
             g.setColor(Color.green);
-            g.fillRect(x, y - 12, (int) Math.round(w * (vida / 500.0)), 8);
+            g.fillRect(x, y - 12, (int) Math.round(w * (vida / 350.0)), 8);
         }
     }
 }

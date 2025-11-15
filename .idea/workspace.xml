@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="Implentacion de Arenas">
+    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="Arena3Testerar">
       <change afterPath="$PROJECT_DIR$/src/app/Test.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Player/Arena3.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Arena3.java" afterDir="false" />
@@ -47,28 +47,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Juego.executor": "Run",
-    "Application.MainLauncher.executor": "Run",
-    "Application.Test.executor": "Run",
-    "Application.sssJuego.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/j/IdeaProjects/ArenaJuego",
-    "onboarding.tips.debug.path": "C:/Users/Oscar Josue/IdeaProjects/ArenaJuego/src/Main.java",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "settings.sync",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Juego.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainLauncher.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Test.executor&quot;: &quot;Run&quot;,
+    &quot;Application.sssJuego.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/j/IdeaProjects/ArenaJuego&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/Oscar Josue/IdeaProjects/ArenaJuego/src/Main.java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -108,7 +108,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763169648042</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Arena3Testerar">
+      <option name="closed" value="true" />
+      <created>1763171409798</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1763171409798</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -126,6 +134,7 @@
     <MESSAGE value="MODIFICACION DEL JEFE" />
     <MESSAGE value="Imagenes" />
     <MESSAGE value="Implentacion de Arenas" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implentacion de Arenas" />
+    <MESSAGE value="Arena3Testerar" />
+    <option name="LAST_COMMIT_MESSAGE" value="Arena3Testerar" />
   </component>
 </project>
