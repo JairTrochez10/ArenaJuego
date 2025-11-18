@@ -4,15 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="MiniEsqueleto">
-      <change afterPath="$PROJECT_DIR$/src/app/Test.java" afterDir="false" />
+    <list default="true" id="6ea092b8-77ed-4653-a55d-e436c5783967" name="Changes" comment="Juego Terminado">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Menu/MenuPrincipal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Menu/MenuPrincipal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Arena2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Arena2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Menu/MenuPuntuacionesPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Menu/MenuPuntuacionesPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Player/Arena3.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Arena3.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Arena4.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Arena4.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/Arena5.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/Arena5.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Player/JefeFinalDragon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/JefeFinalDragon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Player/GameFrameNiveles.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player/GameFrameNiveles.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/Test.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,7 +174,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763440991766</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Juego Terminado">
+      <option name="closed" value="true" />
+      <created>1763493902471</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1763493902471</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -200,6 +205,7 @@
     <MESSAGE value="Arena5Completa" />
     <MESSAGE value="ProyectliesAgregados" />
     <MESSAGE value="MiniEsqueleto" />
-    <option name="LAST_COMMIT_MESSAGE" value="MiniEsqueleto" />
+    <MESSAGE value="Juego Terminado" />
+    <option name="LAST_COMMIT_MESSAGE" value="Juego Terminado" />
   </component>
 </project>

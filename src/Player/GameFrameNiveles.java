@@ -5,31 +5,23 @@ import java.awt.*;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * GameFrameNiveles
  *
- * - Controla: Arena1 -> Arena2 -> Arena3 -> Arena4 -> Arena5
- * - Mantiene puntuacionGlobal y vidaGlobal entre arenas.
- * - Pantalla completa.
- * - TRANSICIÓN SIMPLE:
- *      * Al pasar de arena: pantalla tipo “pausa” con "NIVEL X" 1.5s y sigue solo.
- *      * Al ganar (después de Arena5): pantalla final épica y vuelve al menú.
- * - Al ganar se guarda la puntuacion en ArenaScores.csv con estado VICTORY.
+ * Controla el progreso a través de las arenas (Arena1 -> Arena5).
+ * Muestra transiciones animadas entre niveles y una pantalla de victoria épica.
  */
 public class GameFrameNiveles extends JFrame implements LevelListener {
 
     private int arenaActual = 1;
     private int puntuacionGlobal = 0;
-
-    // Vida global entre niveles. -1 => vida completa al entrar.
     private int vidaGlobal = -1;
 
     private final GameSettings settings;
     private final String heroe;
     private final String nombreJugador;
-
-    // Tiempo global desde que se empezó la primera arena (para el score de victoria).
     private final long startNanosGlobal;
 
     public GameFrameNiveles(GameSettings settings, String heroe, String nombreJugador) {
@@ -39,29 +31,22 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
 
         setTitle("Arena por niveles");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        // Pantalla completa sin bordes
         setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
 
-        // Marca de tiempo global (desde que arranca el modo por niveles)
         this.startNanosGlobal = System.nanoTime();
-
         cargarArena(1);
     }
 
-    /**
-     * Carga una arena (1..5).
-     * Si el número es >5, muestra la pantalla final de victoria.
-     */
-    private void cargarArena(int numeroArena) {
+    // ===================================================================
+    //                  CARGAR ARENAS Y PROGRESO
+    // ===================================================================
+    public void cargarArena(int numeroArena) {
         this.arenaActual = numeroArena;
-
         getContentPane().removeAll();
 
         ArenaBase arena;
-
         switch (numeroArena) {
             case 1 -> arena = new Arena1(settings, heroe, nombreJugador, this);
             case 2 -> arena = new Arena2(settings, heroe, nombreJugador, this);
@@ -74,11 +59,7 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
             }
         }
 
-        // Mantener puntuación acumulada entre arenas
         arena.setPuntuacion(puntuacionGlobal);
-
-        // Vida inicial de esta arena:
-        //   vidaGlobal > 0 => viene de la arena anterior (+200 ya sumados)
         int vidaInicial = (vidaGlobal > 0) ? vidaGlobal : -1;
         arena.iniciar(vidaInicial);
 
@@ -87,34 +68,21 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
         repaint();
     }
 
-    /**
-     * Llamado por cada Arena cuando se mata al jefe de ese nivel.
-     *
-     * @param numeroArena  Número de arena que se completó.
-     * @param puntuacion   Puntuación acumulada.
-     * @param vidaJugador  Vida actual del jugador al terminar.
-     */
     @Override
     public void onLevelComplete(int numeroArena, int puntuacion, int vidaJugador) {
         this.puntuacionGlobal = puntuacion;
-
-        // Curación por NIVEL: +200 HP al pasar a la siguiente arena.
-        this.vidaGlobal = vidaJugador + 200;
+        this.vidaGlobal = vidaJugador + 100; // 🔧 Solo +100 HP entre arenas
 
         if (numeroArena >= 5) {
-            // Ya se completaron las 5 arenas => pantalla de victoria final.
             mostrarPantallaVictoriaCool();
         } else {
-            // Pantalla de transición tipo pausa (sin botón, auto-sigue).
             mostrarTransicionCool(numeroArena);
         }
     }
 
-    /**
-     * Muestra una pantalla de transición a pantalla completa
-     * cuando se termina una arena (1..4).
-     * Solo texto "NIVEL X" + pequeña descripción, y a los 1.5s entra sola.
-     */
+    // ===================================================================
+    //                  TRANSICIÓN ENTRE ARENAS (FADE + CUENTA REGRESIVA)
+    // ===================================================================
     private void mostrarTransicionCool(int numeroArenaCompletada) {
         int siguienteArena = numeroArenaCompletada + 1;
 
@@ -128,21 +96,13 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
         setContentPane(panel);
         revalidate();
         repaint();
-
-        // Timer: 1500 ms y carga la siguiente arena automáticamente.
-        new Timer(1500, e -> {
-            ((Timer) e.getSource()).stop();
-            cargarArena(siguienteArena);
-        }).start();
     }
 
-    /**
-     * Muestra una pantalla de victoria épica a pantalla completa
-     * al terminar la Arena5. Desde aquí se vuelve al Menú Principal.
-     * También guarda la puntuacion en CSV con estado VICTORY.
-     */
+    // ===================================================================
+    //                  GUARDAR Y VICTORIA
+    // ===================================================================
     private void mostrarPantallaVictoriaCool() {
-        guardarScoreVictoria(); // <<--- aquí se guarda la puntuación al ganar
+        guardarScoreVictoria();
 
         VictoryPanel panel = new VictoryPanel(
                 nombreJugador,
@@ -155,11 +115,6 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
         repaint();
     }
 
-    /**
-     * Registra en ArenaScores.csv la victoria final de este modo por niveles.
-     * Formato: fecha, nombreJugador, dificultad, puntuacion, tiempoSegundos, estado
-     * estado = "VICTORY".
-     */
     private void guardarScoreVictoria() {
         try {
             long elapsedSec = Math.max(0, (System.nanoTime() - startNanosGlobal) / 1_000_000_000L);
@@ -175,12 +130,9 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
             try (FileWriter fw = new FileWriter(System.getProperty("user.home") + "/ArenaScores.csv", true)) {
                 fw.write(row + System.lineSeparator());
             }
-        } catch (Exception ignore) { }
+        } catch (Exception ignore) {}
     }
 
-    /**
-     * Regresa al menú principal (MenuPrincipal) y cierra este frame.
-     */
     private void volverAlMenuPrincipal() {
         try {
             Class<?> cls = Class.forName("Menu.MenuPrincipal");
@@ -197,31 +149,48 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
         dispose();
     }
 
-    // =====================================================================
-    //  PANELES DE TRANSICIÓN "COOL"
-    // =====================================================================
-
-    /**
-     * Pantalla de transición entre arenas.
-     * Solo muestra un gran "NIVEL X" + jugador/puntuación
-     * como si fuera una pausa corta.
-     */
+    // ===================================================================
+    //      PANEL DE TRANSICIÓN CON FADE CORREGIDO Y CUENTA REGRESIVA
+    // ===================================================================
     private static class TransitionPanel extends JPanel {
-
         private final int arenaSiguiente;
         private final String nombreJugador;
         private final int puntuacion;
+        private float alpha = 0f;
+        private boolean fadingOut = false;
+        private int countdown = 3;
 
-        public TransitionPanel(int arenaCompletada,
-                               int arenaSiguiente,
-                               String nombreJugador,
-                               int puntuacion) {
+        public TransitionPanel(int arenaCompletada, int arenaSiguiente, String nombreJugador, int puntuacion) {
             this.arenaSiguiente = arenaSiguiente;
             this.nombreJugador = nombreJugador;
             this.puntuacion = puntuacion;
 
             setLayout(new BorderLayout());
             setFocusable(true);
+
+            // Fade control (seguro contra valores fuera de rango)
+            new javax.swing.Timer(50, e -> {
+                if (!fadingOut && alpha < 1f)
+                    alpha = Math.min(1f, alpha + 0.05f);
+                else if (fadingOut && alpha > 0f)
+                    alpha = Math.max(0f, alpha - 0.05f);
+                repaint();
+            }).start();
+
+            // Cuenta regresiva: 3, 2, 1, luego fade-out y cambio de arena
+            new javax.swing.Timer(1000, e -> {
+                countdown--;
+                if (countdown <= 0) {
+                    ((javax.swing.Timer) e.getSource()).stop();
+                    fadingOut = true;
+                    new javax.swing.Timer(1500, ev -> {
+                        ((javax.swing.Timer) ev.getSource()).stop();
+                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                        if (topFrame instanceof GameFrameNiveles gfn)
+                            gfn.cargarArena(arenaSiguiente);
+                    }).start();
+                }
+            }).start();
         }
 
         @Override
@@ -230,73 +199,91 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Fondo oscuro tipo pausa
-            g2.setColor(new Color(0, 0, 0, 210));
+            // Asegurar alpha válido
+            float a = Math.max(0f, Math.min(1f, alpha));
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, a));
+
+            // Fondo degradado oscuro con brillo rojo
+            GradientPaint gp = new GradientPaint(
+                    0, 0, new Color(20, 20, 20),
+                    0, getHeight(), new Color(90, 10, 10)
+            );
+            g2.setPaint(gp);
             g2.fillRect(0, 0, getWidth(), getHeight());
 
-            // "Card" central
+            // Halo dorado suave
+            g2.setColor(new Color(255, 215, 0, 70));
+            int r = Math.max(getWidth(), getHeight());
+            g2.fillOval(getWidth() / 2 - r / 2, getHeight() / 2 - r / 2, r, r);
+
+            // Card central
             int cardW = Math.min(600, getWidth() - 80);
-            int cardH = 220;
+            int cardH = 240;
             int cardX = (getWidth() - cardW) / 2;
             int cardY = (getHeight() - cardH) / 2;
-
-            g2.setColor(new Color(20, 20, 40, 230));
-            g2.fillRoundRect(cardX, cardY, cardW, cardH, 28, 28);
+            g2.setColor(new Color(0, 0, 0, 180));
+            g2.fillRoundRect(cardX, cardY, cardW, cardH, 30, 30);
             g2.setStroke(new BasicStroke(3f));
-            g2.setColor(new Color(255, 215, 0, 220));
-            g2.drawRoundRect(cardX + 1, cardY + 1, cardW - 2, cardH - 2, 28, 28);
+            g2.setColor(new Color(255, 215, 0, 200));
+            g2.drawRoundRect(cardX + 1, cardY + 1, cardW - 2, cardH - 2, 30, 30);
 
-            // Texto: NIVEL X
-            String nivelTxt = "NIVEL " + arenaSiguiente;
-            g2.setFont(new Font("Consolas", Font.BOLD, 48));
-            int tw = g2.getFontMetrics().stringWidth(nivelTxt);
-            int tx = getWidth() / 2 - tw / 2;
-            int ty = cardY + 80;
-            g2.setColor(new Color(255, 240, 200));
-            g2.drawString(nivelTxt, tx, ty);
+            // Texto principal: NIVEL X
+            g2.setFont(new Font("Consolas", Font.BOLD, 58));
+            String titulo = "NIVEL " + arenaSiguiente;
+            int tw = g2.getFontMetrics().stringWidth(titulo);
+            g2.setColor(new Color(255, 240, 180));
+            g2.drawString(titulo, getWidth() / 2 - tw / 2, cardY + 90);
 
-            // Texto secundario
-            g2.setFont(new Font("Consolas", Font.PLAIN, 22));
+            // Jugador y puntuación
+            g2.setFont(new Font("Consolas", Font.PLAIN, 24));
             String jTxt = "Jugador: " + nombreJugador;
             String pTxt = "Puntuación: " + puntuacion;
-            int twJ = g2.getFontMetrics().stringWidth(jTxt);
-            int twP = g2.getFontMetrics().stringWidth(pTxt);
-            int baseY = cardY + 130;
+            int baseY = cardY + 140;
             g2.setColor(Color.WHITE);
-            g2.drawString(jTxt, getWidth() / 2 - twJ / 2, baseY);
-            g2.drawString(pTxt, getWidth() / 2 - twP / 2, baseY + 30);
+            g2.drawString(jTxt, getWidth() / 2 - g2.getFontMetrics().stringWidth(jTxt) / 2, baseY);
+            g2.drawString(pTxt, getWidth() / 2 - g2.getFontMetrics().stringWidth(pTxt) / 2, baseY + 30);
 
-            // Nota pequeña
-            g2.setFont(new Font("Consolas", Font.PLAIN, 16));
-            String nota = "Preparando la siguiente arena...";
-            int twN = g2.getFontMetrics().stringWidth(nota);
-            g2.setColor(new Color(200, 200, 200));
-            g2.drawString(nota, getWidth() / 2 - twN / 2, cardY + cardH - 20);
+            // Cuenta regresiva
+            g2.setFont(new Font("Consolas", Font.BOLD, 40));
+            String cTxt = (countdown > 0) ? "Entrando en... " + countdown : "Cargando arena...";
+            int twC = g2.getFontMetrics().stringWidth(cTxt);
+            g2.setColor(new Color(255, 215, 0, 210));
+            g2.drawString(cTxt, getWidth() / 2 - twC / 2, cardY + cardH - 30);
 
             g2.dispose();
         }
     }
 
-    /**
-     * Pantalla final de victoria (después de Arena5).
-     * Texto grande "¡VICTORIA TOTAL!"
-     * y botón "Volver al Menú Principal".
-     */
+    // ===================================================================
+    //              PANTALLA DE VICTORIA ÉPICA CON RELÁMPAGOS
+    // ===================================================================
     private static class VictoryPanel extends JPanel {
-
         private final String nombreJugador;
         private final int puntuacionFinal;
         private final Runnable onVolverMenu;
+        private final java.util.List<Lightning> rayos = new ArrayList<>();
+        private long lastRayo = 0;
+        private double shakePhase = 0;
+        private float glowPhase = 0;
 
-        public VictoryPanel(String nombreJugador,
-                            int puntuacionFinal,
-                            Runnable onVolverMenu) {
+        public VictoryPanel(String nombreJugador, int puntuacionFinal, Runnable onVolverMenu) {
             this.nombreJugador = nombreJugador;
             this.puntuacionFinal = puntuacionFinal;
             this.onVolverMenu = onVolverMenu;
 
             setLayout(new BorderLayout());
             setFocusable(true);
+
+            new javax.swing.Timer(16, e -> {
+                glowPhase += 0.05;
+                shakePhase += 0.12;
+                if (Math.random() < 0.02 && System.currentTimeMillis() - lastRayo > 600) {
+                    rayos.add(new Lightning(getWidth(), getHeight()));
+                    lastRayo = System.currentTimeMillis();
+                }
+                rayos.removeIf(l -> !l.activo);
+                repaint();
+            }).start();
         }
 
         @Override
@@ -305,63 +292,59 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Fondo tipo épico rojo
-            GradientPaint gp = new GradientPaint(
-                    0, 0, new Color(30, 10, 10),
-                    0, getHeight(), new Color(90, 30, 30)
-            );
+            GradientPaint gp = new GradientPaint(0, 0, new Color(20, 0, 0), 0, getHeight(), new Color(100, 0, 0));
             g2.setPaint(gp);
             g2.fillRect(0, 0, getWidth(), getHeight());
 
-            // Halo dorado
-            g2.setColor(new Color(255, 215, 0, 55));
+            g2.setColor(new Color(255, 80, 0, 70));
             int r = Math.max(getWidth(), getHeight());
-            g2.fillOval(getWidth() / 2 - r / 2, getHeight() / 2 - r / 2, r, r);
+            g2.fillOval(getWidth()/2 - r/2, getHeight()/2 - r/2, r, r);
 
-            // Card central
+            for (Lightning l : rayos) l.draw(g2);
+
+            int offsetX = (int)(Math.sin(shakePhase) * 2);
+            int offsetY = (int)(Math.cos(shakePhase * 0.8) * 2);
+
             int cardW = Math.min(700, getWidth() - 80);
-            int cardH = 260;
-            int cardX = (getWidth() - cardW) / 2;
-            int cardY = (getHeight() - cardH) / 2;
+            int cardH = 270;
+            int cardX = (getWidth() - cardW) / 2 + offsetX;
+            int cardY = (getHeight() - cardH) / 2 + offsetY;
 
-            g2.setColor(new Color(20, 10, 10, 230));
-            g2.fillRoundRect(cardX, cardY, cardW, cardH, 30, 30);
+            g2.setColor(new Color(30, 0, 0, 240));
+            g2.fillRoundRect(cardX, cardY, cardW, cardH, 28, 28);
             g2.setStroke(new BasicStroke(3f));
             g2.setColor(new Color(255, 215, 0, 230));
-            g2.drawRoundRect(cardX + 1, cardY + 1, cardW - 2, cardH - 2, 30, 30);
+            g2.drawRoundRect(cardX + 1, cardY + 1, cardW - 2, cardH - 2, 28, 28);
 
-            // Título
-            String titulo = "¡VICTORIA TOTAL!";
-            g2.setFont(new Font("Consolas", Font.BOLD, 50));
+            float glow = (float)(0.5 + 0.5 * Math.sin(glowPhase));
+            Color glowColor = new Color(255, 220, 80, (int)(150 + 80 * glow));
+
+            g2.setFont(new Font("Consolas", Font.BOLD, 64));
+            String titulo = "¡VICTORIA!";
             int tw = g2.getFontMetrics().stringWidth(titulo);
-            g2.setColor(new Color(255, 240, 200));
-            g2.drawString(titulo, getWidth() / 2 - tw / 2, cardY + 80);
+            g2.setColor(glowColor);
+            g2.drawString(titulo, getWidth()/2 - tw/2, cardY + 80);
 
-            // Info
             g2.setFont(new Font("Consolas", Font.PLAIN, 24));
             String jTxt = "Jugador: " + nombreJugador;
             String pTxt = "Puntuación final: " + puntuacionFinal;
-            int twJ = g2.getFontMetrics().stringWidth(jTxt);
-            int twP = g2.getFontMetrics().stringWidth(pTxt);
-            int baseY = cardY + 125;
+            int baseY = cardY + 130;
             g2.setColor(Color.WHITE);
-            g2.drawString(jTxt, getWidth() / 2 - twJ / 2, baseY);
-            g2.drawString(pTxt, getWidth() / 2 - twP / 2, baseY + 30);
+            g2.drawString(jTxt, getWidth()/2 - g2.getFontMetrics().stringWidth(jTxt)/2, baseY);
+            g2.drawString(pTxt, getWidth()/2 - g2.getFontMetrics().stringWidth(pTxt)/2, baseY + 30);
 
-            // Botón “Volver al menú” dibujado bonito (y usamos ENTER/ESPACIO para activarlo)
-            int btnW = 320, btnH = 50;
-            int btnX = getWidth() / 2 - btnW / 2;
+            int btnW = 300, btnH = 50;
+            int btnX = getWidth()/2 - btnW/2;
             int btnY = cardY + cardH - 70;
-            g2.setColor(new Color(60, 20, 20, 230));
+            g2.setColor(new Color(90, 0, 0, 230));
             g2.fillRoundRect(btnX, btnY, btnW, btnH, 20, 20);
-            g2.setColor(new Color(255, 215, 0, 220));
+            g2.setColor(new Color(255, 215, 0, 200));
             g2.setStroke(new BasicStroke(2.5f));
             g2.drawRoundRect(btnX, btnY, btnW, btnH, 20, 20);
-            String btnTxt = "Volver al Menú Principal (ENTER)";
             g2.setFont(new Font("Consolas", Font.BOLD, 18));
-            int twB = g2.getFontMetrics().stringWidth(btnTxt);
+            String btnTxt = "Volver al Menú Principal (ENTER)";
             g2.setColor(Color.WHITE);
-            g2.drawString(btnTxt, getWidth() / 2 - twB / 2, btnY + 32);
+            g2.drawString(btnTxt, getWidth()/2 - g2.getFontMetrics().stringWidth(btnTxt)/2, btnY + 32);
 
             g2.dispose();
         }
@@ -369,7 +352,6 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
         @Override
         public void addNotify() {
             super.addNotify();
-            // ENTER / ESPACIO -> volver al menú
             getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "menu");
             getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "menu");
             getActionMap().put("menu", new AbstractAction() {
@@ -378,6 +360,28 @@ public class GameFrameNiveles extends JFrame implements LevelListener {
                     if (onVolverMenu != null) onVolverMenu.run();
                 }
             });
+        }
+
+        private static class Lightning {
+            int x1, y1, x2, y2, life = 10;
+            boolean activo = true;
+            Stroke stroke = new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            Lightning(int w, int h) {
+                Random r = new Random();
+                x1 = r.nextInt(w);
+                y1 = 0;
+                x2 = x1 + r.nextInt(80) - 40;
+                y2 = r.nextInt(h / 2) + h / 3;
+            }
+            void draw(Graphics2D g) {
+                if (!activo) return;
+                g.setStroke(stroke);
+                g.setColor(new Color(255, 255, 180, (int)(180 * (life / 10.0))));
+                g.drawLine(x1, y1, x2, y2);
+                g.drawLine(x2, y2, x2 + (int)(Math.random() * 30 - 15), y2 + (int)(Math.random() * 40));
+                life--;
+                if (life <= 0) activo = false;
+            }
         }
     }
 }

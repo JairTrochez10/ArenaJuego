@@ -27,7 +27,7 @@ public class Test {
 
         // ====== IMPORTANTE ======
         // Puedes cambiar Arena4 por otra para probar otras arenas.
-        ArenaBase arena = new Arena4(settings, heroe, nombreJugador, null);
+        ArenaBase arena = new Arena3(settings, heroe, nombreJugador, null);
 
         // Inicializar con vida completa
         arena.iniciar(-1);
