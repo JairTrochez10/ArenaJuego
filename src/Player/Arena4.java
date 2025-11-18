@@ -19,7 +19,7 @@ public class Arena4 extends ArenaBase {
                 nombreJugador,
                 listener,
                 4,                        // número de arena
-                "/Imagenes/Arena4.jpg"    // fondo de esta arena
+                "/Imagenes/zona4demon/fondo/descarga.gif"    // fondo de esta arena
         );
     }
 }

@@ -4,21 +4,25 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Arena 5 – Dragon Final
- * Incluye animación épica de entrada:
+ * Arena 5 – Dragón Final
+ * Solo genera enemigos propios (EnemigosArena5)
+ * Sin enemigos base.
+ * Animación épica de entrada:
  *  - Pantalla oscura
  *  - Bordes rojos
  *  - Temblor largo
- *  - DRAGON FINAL gigante
- *  - Lógica congelada mientras dura
+ *  - Texto DRAGÓN FINAL gigante
+ *  - Lógica congelada durante la intro
+ *
+ * Ahora: si el jugador muere o reinicia, regresa automáticamente a Arena1.
  */
 public class Arena5 extends ArenaBase {
 
     // ============================
-    //  DURACIONES EPIC ENTRANCE
+    //  DURACIONES ENTRADA ÉPICA
     // ============================
     private static final long BOSS_INTRO_DURATION_MS = 6000; // 6s total
-    private static final long BOSS_INTRO_SHAKE_MS    = 4500; // 4.5s de temblor
+    private static final long BOSS_INTRO_SHAKE_MS = 4500;    // 4.5s de temblor
 
     private long bossIntroStartMs = -1;
     private boolean bossIntroActive = false;
@@ -27,7 +31,6 @@ public class Arena5 extends ArenaBase {
                   String heroe,
                   String nombreJugador,
                   LevelListener listener) {
-
         super(settings, heroe, nombreJugador, listener,
                 5, "/Imagenes/Zona5/fondo.png");
     }
@@ -38,33 +41,32 @@ public class Arena5 extends ArenaBase {
     @Override
     protected int getEnemigosForRonda(int ronda) {
         return switch (ronda) {
-            case 1 -> 8;
-            case 2 -> 10;
-            case 3 -> 14;
-            default -> 8;
+            case 1 -> 6;
+            case 2 -> 8;
+            case 3 -> 12;
+            default -> 6;
         };
     }
 
     @Override
     protected void spawnEnemigosRonda(int ronda) {
+        enemigos.enemigos.clear();
         int cantidad = getEnemigosForRonda(ronda);
         enemigos.setExtraSpeedMul(roundMulEnemy);
 
         for (int i = 0; i < cantidad; i++) {
-
             int x = margen + (int) (Math.random() * (getWidth() - margen * 2));
             int y = margen + (int) (Math.random() * (getHeight() - margen * 2));
 
             int tipo = (i % 2 == 0) ? 1 : 2;
 
-            int vida = 30 + ronda * 10;
+            int vida = 40 + ronda * 15;
             int vel = (int) Math.round(Monstruo.SPEED_BASE * settings.enemySpeedMul * roundMulEnemy);
-            int dmg = 6 + ronda * 5;
+            int dmg = 8 + ronda * 6;
 
             enemigos.enemigos.add(new EnemigosArena5(x, y, tipo, vida, vel, dmg));
         }
 
-        // Curación normal
         int before = jugador.vida;
         jugador.vida = Math.min(jugador.vidaMax, jugador.vida + HEAL_ROUND_AMOUNT);
         if (jugador.vida > before) {
@@ -81,8 +83,6 @@ public class Arena5 extends ArenaBase {
     // ============================
     @Override
     protected JefeFinal crearJefe() {
-
-        // Activa ANIMACIÓN ÉPICA
         bossIntroActive = true;
         bossIntroStartMs = System.currentTimeMillis();
 
@@ -92,34 +92,38 @@ public class Arena5 extends ArenaBase {
     }
 
     // ============================
-    //      UPDATE CON CONGELADO
+    //    UPDATE CON CONGELADO
     // ============================
     @Override
     public void actionPerformed(java.awt.event.ActionEvent e) {
-
         long now = System.currentTimeMillis();
 
-        // Si la animación está activa => CONGELAR LÓGICA COMPLETA
+        // 🔒 Durante la intro: lógica congelada
         if (bossIntroActive && now - bossIntroStartMs < BOSS_INTRO_DURATION_MS) {
-            repaint(); // solo repinta efectos
-            return;    // ❌ No ejecutamos super.actionPerformed()
+            repaint();
+            return;
         }
 
-        // Cuando termina la animación, continuar normal
+        // Luego del intro: continúa normal
         super.actionPerformed(e);
 
-        // Cuando el dragón está activo puede invocar enemigos
+        // Si el jugador muere, volvemos automáticamente a Arena1
+        if (jugador.vida <= 0) {
+            volverAArena1();
+            return;
+        }
+
+        // Dragón invoca enemigos durante batalla
         if (bossActivo && jefeFinal instanceof JefeFinalDragon dragon) {
             dragon.intentarSpawnearEnemigos(enemigos, rondaActual);
         }
     }
 
     // ============================
-    //   EFECTO EPICO VISUAL
+    //   EFECTO VISUAL ÉPICO
     // ============================
     @Override
     protected void paintComponent(Graphics g) {
-
         super.paintComponent(g);
 
         if (!bossIntroActive) return;
@@ -158,8 +162,8 @@ public class Arena5 extends ArenaBase {
             );
         }
 
-        // TEXTO DRAGON FINAL
-        String txt = "DRAGON FINAL";
+        // TEXTO "DRAGÓN FINAL"
+        String txt = "DRAGÓN FINAL";
         g2.setFont(new Font("Consolas", Font.BOLD, 75));
         int w = g2.getFontMetrics().stringWidth(txt);
         int x = getWidth() / 2 - w / 2;
@@ -169,5 +173,35 @@ public class Arena5 extends ArenaBase {
         g2.drawString(txt, x, y);
 
         g2.dispose();
+    }
+
+    // ============================
+    //   REINICIO AUTOMÁTICO
+    // ============================
+    @Override
+    protected void reiniciarArena() {
+        volverAArena1();
+    }
+
+    /**
+     * 🔁 Vuelve automáticamente al inicio (Arena1) con mensaje de derrota.
+     */
+    private void volverAArena1() {
+        if (timer != null) timer.stop();
+        puntuacion = 0;
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Has sido derrotado...\nRegresando al inicio.",
+                "Derrota",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame != null) {
+            frame.dispose();
+            GameFrameNiveles nuevo = new GameFrameNiveles(settings, heroeElegido, nombreJugador);
+            nuevo.setVisible(true);
+        }
     }
 }

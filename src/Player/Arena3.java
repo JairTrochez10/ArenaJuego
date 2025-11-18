@@ -113,7 +113,8 @@ public class Arena3 extends ArenaBase {
 
     @Override
     protected void reiniciarArena() {
-        iniciar(-1); // reiniciar con vida completa
+        // 🔁 En vez de reiniciar la misma arena, volvemos a Arena1
+        volverAArena1();
     }
 
     // ----------------- Spawns de la Zona 3 -----------------
@@ -125,22 +126,22 @@ public class Arena3 extends ArenaBase {
         int w = Math.max(getWidth(), 1200);
         int h = Math.max(getHeight(), 700);
 
-        // Ojo caminante (varios) - vida base 35 (definida en Enemigo3)
+        // Ojo caminante (varios)
         for (int i = 0; i < 2 * mult + 2; i++) {
             Point p = pickSpawn(w, h);
             enemigosZ3.add(new OjoCaminante(p.x, p.y, R_OJO_WALK, R_OJO_HIT));
         }
-        // Rojos pequeños (rápidos, disparan) VIDA: 30
+        // Rojos pequeños
         for (int i = 0; i < 2 * mult + 2; i++) {
             Point p = pickSpawn(w, h);
             enemigosZ3.add(new RojoShooter(p.x, p.y, R_ROJO_P, 30, 4, 2, 55));
         }
-        // Rojos grandes (lentos, duros, disparan más fuerte) VIDA: 55
+        // Rojos grandes
         for (int i = 0; i < 1 * mult + 1; i++) {
             Point p = pickSpawn(w, h);
             enemigosZ3.add(new RojoShooter(p.x, p.y, R_ROJO_G, 55, 3, 3, 75));
         }
-        // Azules (lanzan rayo láser) VIDA: 40
+        // Azules
         for (int i = 0; i < 1 * mult + 1; i++) {
             Point p = pickSpawn(w, h);
             enemigosZ3.add(new AzulLaser(p.x, p.y, R_AZUL, 40, 3, 1600, 2300)); // cd min/max
@@ -294,16 +295,44 @@ public class Arena3 extends ArenaBase {
             // ¿Muerte del jugador?
             if (jugador.vida <= 0) {
                 gameOver = true;
+                // 🔁 En vez de solo GAME OVER, regresamos a Arena1
+                volverAArena1();
+                return;
             }
         }
 
         repaint();
+    }
 
-        if (gameOver && timer != null && timer.isRunning()) {
+    /**
+     * 🔁 Vuelve automáticamente al sistema de niveles empezando en Arena1.
+     *    - Resetea puntuación.
+     *    - Cierra el frame actual.
+     *    - Crea un nuevo GameFrameNiveles.
+     */
+    private void volverAArena1() {
+        if (timer != null && timer.isRunning()) {
             timer.stop();
-            saveScoreGameOver();
-            showGameOverDialog();
         }
+
+        // Reiniciar puntuación SOLO para esta arena
+        this.puntuacion = 0;
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Has sido derrotado en la Arena 3...\nVolviendo al inicio (Arena 1).",
+                "Derrota",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        // Cerrar la ventana actual y abrir un nuevo flujo de niveles
+        Window w = SwingUtilities.getWindowAncestor(this);
+        if (w instanceof JFrame jf) {
+            jf.dispose();
+        }
+
+        GameFrameNiveles nuevo = new GameFrameNiveles(settings, heroeElegido, nombreJugador);
+        nuevo.setVisible(true);
     }
 
     // ----------------- Dibujo (override) -----------------
@@ -457,7 +486,7 @@ public class Arena3 extends ArenaBase {
             g2.dispose();
         }
 
-        // Overlay GAME OVER simple (el diálogo sale aparte)
+        // Overlay GAME OVER simple (el diálogo real lo manejamos nosotros)
         if (gameOver) {
             g.setFont(new Font("Arial", Font.BOLD, 50));
             int w = g.getFontMetrics().stringWidth("GAME OVER");
@@ -478,9 +507,9 @@ public class Arena3 extends ArenaBase {
     private abstract static class Enemigo3 {
         int x, y;
         int w = 56, h = 56;
-        int vida = 35;   // ANTES 50 -> ahora menos vida
+        int vida = 40;   // ANTES 50 -> ahora menos vida
         int velocidad = 3;
-        int daño = 2;    // contacto MUY bajo
+        int daño = 5;    // contacto MUY bajo
         Image sprite;
 
         Enemigo3(int x, int y, String ruta) {

@@ -19,7 +19,37 @@ public class MenuPrincipal extends JFrame {
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0; gbc.insets = new Insets(12, 0, 12, 0);
+        gbc.fill = GridBagConstraints.NONE;
 
+        // ======= TÍTULO DEL JUEGO =======
+        JLabel titulo = new JLabel("Dungeons and Dragons", SwingConstants.CENTER);
+        titulo.setFont(new Font("Serif", Font.BOLD, 64));
+        titulo.setForeground(new Color(255, 215, 0));
+        titulo.setOpaque(false);
+        titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
+
+        // Efecto de sombra / brillo
+        titulo.setUI(new javax.swing.plaf.basic.BasicLabelUI() {
+            @Override
+            public void paint(Graphics g, JComponent c) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                String text = ((JLabel) c).getText();
+                FontMetrics fm = g2.getFontMetrics(c.getFont());
+                int x = (c.getWidth() - fm.stringWidth(text)) / 2;
+                int y = (c.getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                g2.setColor(new Color(0, 0, 0, 150));
+                g2.drawString(text, x + 3, y + 3);
+                g2.setColor(new Color(255, 215, 0));
+                g2.drawString(text, x, y);
+                g2.dispose();
+            }
+        });
+
+        gbc.gridy = 0;
+        root.add(titulo, gbc);
+
+        // ======= BOTONES =======
         JButton jugar         = boton("Iniciar Juego");
         JButton instrucciones = boton("Instrucciones");
         JButton puntuaciones  = boton("Puntuaciones");
@@ -32,15 +62,15 @@ public class MenuPrincipal extends JFrame {
         creditos.setPreferredSize(BTN_SIZE);
         salir.setPreferredSize(BTN_SIZE);
 
-        root.add(jugar, gbc);           gbc.gridy = 1;
-        root.add(instrucciones, gbc);   gbc.gridy = 2;
-        root.add(puntuaciones, gbc);    gbc.gridy = 3;
-        root.add(creditos, gbc);        gbc.gridy = 4;
-        root.add(salir, gbc);
+        gbc.gridy = 1; root.add(jugar, gbc);
+        gbc.gridy = 2; root.add(instrucciones, gbc);
+        gbc.gridy = 3; root.add(puntuaciones, gbc);
+        gbc.gridy = 4; root.add(creditos, gbc);
+        gbc.gridy = 5; root.add(salir, gbc);
 
         setContentPane(root);
 
-        // Navegación
+        // ======= NAVEGACIÓN =======
         jugar.addActionListener(e -> {
             setContentPane(new MenuDificultadPanel(this));
             revalidate(); repaint();
@@ -56,7 +86,6 @@ public class MenuPrincipal extends JFrame {
             revalidate(); repaint();
         });
 
-        // 👉 Ahora abre el panel bonito de créditos
         creditos.addActionListener(e -> {
             setContentPane(new MenuCreditosPanel(this));
             revalidate(); repaint();
@@ -77,6 +106,7 @@ public class MenuPrincipal extends JFrame {
         f.setResizable(false);
         f.setLocationRelativeTo(null);
     }
+
     public static JButton boton(String txt) {
         JButton b = new JButton(txt) {
             @Override protected void paintComponent(Graphics g) {
@@ -104,10 +134,14 @@ public class MenuPrincipal extends JFrame {
         b.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
         return b;
     }
+
     public static String firstExisting(String... rutas) {
-        for (String r : rutas) if (MenuPrincipal.class.getResource(r) != null) return r;
+        for (String r : rutas)
+            if (MenuPrincipal.class.getResource(r) != null)
+                return r;
         return null;
     }
+
     static class PanelFondo extends JPanel {
         final Image img;
         PanelFondo(String ruta) {
@@ -117,6 +151,7 @@ public class MenuPrincipal extends JFrame {
             }
             img = tmp;
         }
+
         @Override protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (img != null) g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
