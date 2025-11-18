@@ -38,10 +38,10 @@ public class Arena5 extends ArenaBase {
     @Override
     protected int getEnemigosForRonda(int ronda) {
         return switch (ronda) {
-            case 1 -> 5;
-            case 2 -> 8;
-            case 3 -> 10;
-            default -> 5;
+            case 1 -> 8;
+            case 2 -> 10;
+            case 3 -> 14;
+            default -> 8;
         };
     }
 

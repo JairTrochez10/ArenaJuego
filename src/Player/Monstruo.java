@@ -15,6 +15,9 @@ import java.util.List;
  */
 public class Monstruo {
 
+    // referencia estática al "monstruo actual" (la arena en juego)
+    public static Monstruo CURRENT;
+
     public ArrayList<Enemigo> enemigos = new ArrayList<>();
 
     private int anchoPantalla = 0, altoPantalla = 0, margen = 0;
@@ -29,6 +32,7 @@ public class Monstruo {
 
     public Monstruo(GameSettings settings) {
         this.settings = settings;
+        CURRENT = this; // <- para que JefeFinal pueda invocar esqueletos en esta lista
     }
 
     public void setExtraSpeedMul(double mul) {
